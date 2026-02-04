@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: laundry_app
+    volumes:
+      - ./laundry_app:/var/www/html
+    ports:
+      - "8020:80"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: laundry_db
+      DB_USERNAME: laravel
+      DB_PASSWORD: secret
+    depends_on:
+      - mysql
+      - phpmyadmin
+    networks:
+      - laundry_net
+
+  mysql:
+    image: mysql:8
+    container_name: laundry_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laundry_db
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laundry_net
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laundry_phpmyadmin
+    restart: always
+    ports:
+      - "8021:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - mysql
+    networks:
+      - laundry_net
+networks:
+  laundry_net:
+
+volumes:
+  mysql_data:
